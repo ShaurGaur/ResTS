@@ -65,7 +65,7 @@ nbr_of_classes = 38
 #     yield x, [y, y]
 
 # Use the same directory for both train and validation
-DATASET_DIR = "../PlantVillage/Plant_leave_diseases_dataset_without_augmentation"
+DATASET_DIR = "../PlantVillage-Dataset/raw/segmented"
 BATCH_SIZE = 16
 SEED = 123
 VAL_SPLIT = 0.2
@@ -355,13 +355,13 @@ model.compile(
 )
 model.summary()
 
-nb_epoch = 2  # 15
+nb_epoch = 15
 history = model.fit(
     train_ds,
-    steps_per_epoch=2,  # 2545,
+    steps_per_epoch=2545,
     epochs=nb_epoch,
     validation_data=val_ds,
-    validation_steps=1,  # 678,
+    validation_steps=678,
 )
 
 df = pd.DataFrame(history.history)

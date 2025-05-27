@@ -28,78 +28,70 @@ import shutil
 input_shape = (224, 224, 3)
 nbr_of_classes = 38
 
-# TRAINING_DIR = "train"
-
-# training_datagen = ImageDataGenerator(rotation_range=40,
-#                 width_shift_range=0.1,
-#                 height_shift_range=0.1,
-#                 preprocessing_function=preprocess_input,
-#                 horizontal_flip=False,
-#                 fill_mode='nearest')
-
-# VALIDATION_DIR = "val"
-# validation_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-# def train():
-#   train_generator = training_datagen.flow_from_directory(
-#     TRAINING_DIR,
-#     target_size=(224,224),
-#     shuffle = True,
-#     class_mode='categorical',
-#     batch_size = 16
-#   )
-#   while True:
-#     x, y = train_generator.next()
-#     yield x, [y, y]
-
-# def valid():
-#   validation_generator = validation_datagen.flow_from_directory(
-#     VALIDATION_DIR,
-#     target_size=(224,224),
-#     class_mode='categorical',
-#     shuffle = True,
-#     batch_size= 16
-#   )
-#   while True:
-#     x, y = validation_generator.next()
-#     yield x, [y, y]
-
 # Use the same directory for both train and validation
 DATASET_DIR = "../PlantVillage-Dataset/raw/segmented"
 BATCH_SIZE = 16
 SEED = 123
-VAL_SPLIT = 0.2
+test_SPLIT = 0.2
 
-# Load training and validation datasets
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    DATASET_DIR,
-    validation_split=VAL_SPLIT,
-    subset="training",
-    seed=SEED,
-    image_size=(224, 224),
-    batch_size=BATCH_SIZE,
-    label_mode="categorical",
-)
+DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
+TRAIN_TXT = f"{DATASPLIT_DIR}/train.txt"
+TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
+LABELS_TXT = f"{DATASPLIT_DIR}/labels.txt"
 
-val_ds = tf.keras.utils.image_dataset_from_directory(
-    DATASET_DIR,
-    validation_split=VAL_SPLIT,
-    subset="validation",
-    seed=SEED,
-    image_size=(224, 224),
-    batch_size=BATCH_SIZE,
-    label_mode="categorical",
-)
+# # Load training and validation datasets
+# train_ds = tf.keras.utils.image_dataset_from_directory(
+#     DATASET_DIR,
+#     validation_split=test_SPLIT,
+#     subset="training",
+#     seed=SEED,
+#     image_size=(224, 224),
+#     batch_size=BATCH_SIZE,
+#     label_mode="categorical",
+# )
 
+# test_ds = tf.keras.utils.image_dataset_from_directory(
+#     DATASET_DIR,
+#     validation_split=test_SPLIT,
+#     subset="validation",
+#     seed=SEED,
+#     image_size=(224, 224),
+#     batch_size=BATCH_SIZE,
+#     label_mode="categorical",
+# )
+
+def load_image(file_path):
+    image = tf.io.read_file(file_path)
+    image = tf.image.decode_jpeg(image, channels=3)  # or decode_png if needed
+    image = tf.image.resize(image, [224, 224])  # resize as needed
+    return image
+
+def load_dataset(file_txt=TEST_TXT, labels_txt=LABELS_TXT):
+    df = pd.read_csv(file_txt, sep='\t', header=None, names=['img_path', 'label_num'])
+    file_paths = df['img_path'].tolist()
+    labels = df['label_num'].tolist()
+
+    # with open(labels_txt) as file:
+    #     class_names = [line.rstrip() for line in file]
+    # labels = [class_names[i] for i in label_idxs]
+    
+    dataset = tf.data.Dataset.from_tensor_slices((file_paths, labels))
+    dataset = dataset.map(lambda x, y: (load_image(x), tf.one_hot(y, depth=nbr_of_classes)))
+    return dataset
 
 # Apply preprocessing (e.g., rescaling to match preprocess_input)
 def preprocess_and_duplicate_labels(x, y):
     x = preprocess_input(x)  # Apply model-specific preprocessing
     return x, {"out1": y, "out2": y}  # Duplicate labels for dual output heads
 
+train_ds = load_dataset(TRAIN_TXT)
+test_ds = load_dataset(TEST_TXT)
 
-train_ds = train_ds.map(preprocess_and_duplicate_labels)
-val_ds = val_ds.map(preprocess_and_duplicate_labels)
+print("train: ", len(train_ds))
+print("test: ", len(test_ds))
+
+train_ds = train_ds.batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
+test_ds = test_ds.batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
 
 # Optional: Add augmentation (only on training set)
 data_augmentation = tf.keras.Sequential(
@@ -114,7 +106,7 @@ train_ds = train_ds.map(lambda x, y: (data_augmentation(x, training=True), y))
 # Prefetch for performance
 AUTOTUNE = tf.data.AUTOTUNE
 train_ds = train_ds.prefetch(AUTOTUNE)
-val_ds = val_ds.prefetch(AUTOTUNE)
+test_ds = test_ds.prefetch(AUTOTUNE)
 
 # Encoder Start
 base_model1 = tf.keras.applications.Xception(
@@ -355,13 +347,13 @@ model.compile(
 )
 model.summary()
 
-nb_epoch = 15
+nb_epoch = 2 #15
 history = model.fit(
     train_ds,
-    steps_per_epoch=2545,
+    steps_per_epoch=2, #2545,
     epochs=nb_epoch,
-    validation_data=val_ds,
-    validation_steps=678,
+    validation_data=test_ds,
+    validation_steps=1 #678,
 )
 
 df = pd.DataFrame(history.history)

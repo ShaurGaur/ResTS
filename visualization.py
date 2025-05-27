@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -13,7 +14,6 @@ from keras import __version__
 from keras.applications.xception import preprocess_input as xception_preprocess_input
 from keras.layers import *
 from keras.activations import *
-from keras.preprocessing.image import ImageDataGenerator
 from keras.optimizers import SGD
 from keras import optimizers
 from keras import callbacks
@@ -25,10 +25,7 @@ from keras.regularizers import l2,l1
 import pandas as pd
 import datetime
 from keras import backend as K
-import tensorflow as tf
-import keras_preprocessing
-from keras_preprocessing import image
-import cv2
+from keras.utils import load_img, img_to_array
 
 input_shape = (224,224,3)
 nbr_of_classes=38
@@ -252,22 +249,33 @@ losses = {
         }
 alpha=0.4
 lossWeights = {"out1": alpha, "out2": (1.0-alpha)}
-model.compile(optimizer=optimizers.SGD(lr=1e-4, momentum=0.9), loss=losses, loss_weights=lossWeights, metrics = ['accuracy'])
-#model.summary()
+model.compile(optimizer=optimizers.SGD(learning_rate=1e-4, momentum=0.9), loss=losses, loss_weights=lossWeights, metrics = {"out1": "accuracy", "out2": "accuracy"})
+# model.summary()
 
 def preprocess_image(image_path,image_size = (224,224)):
-    original_image = image.load_img(image_path , target_size=image_size)
-    img = image.img_to_array(original_image)
+    original_image = load_img(image_path , target_size=image_size)
+    img = img_to_array(original_image)
     img = np.expand_dims(img, axis=0)
     img = xception_preprocess_input(img)
     return original_image,img
 
+# def build_visualization(model_weights_path):
+#     model.load_weights(model_weights_path)
+#     layer_name ='Mask'
+#     NewInput = model.get_layer(layer_name).output
+#     visualization = K.function([model.input], [NewInput])
+#     return visualization,model
+
 def build_visualization(model_weights_path):
     model.load_weights(model_weights_path)
-    layer_name ='Mask'
-    NewInput = model.get_layer(layer_name).output
-    visualization = K.function([model.input], [NewInput])
-    return visualization,model
+    
+    layer_name = 'Mask'  # Name of the layer you want to extract
+    intermediate_layer = model.get_layer(layer_name).output
+
+    # Create a new model from original input to the desired layer's output
+    visualization_model = Model(inputs=model.input, outputs=intermediate_layer)
+    
+    return visualization_model, model
 
 def reduce_channels_sequare(heatmap):
     channel1 = heatmap[:,:,0]
@@ -277,7 +285,7 @@ def reduce_channels_sequare(heatmap):
     return new_heatmap
 	
 def postprocess_vis(heatmap1,threshould = 0.9):
-    heatmap=heatmap1.copy()
+    heatmap = heatmap1.numpy().copy()
     heatmap = (heatmap - heatmap.min())/(heatmap.max() - heatmap.min())
     heatmap = reduce_channels_sequare(heatmap)
     heatmap = (heatmap - heatmap.min())/(heatmap.max() - heatmap.min())
@@ -285,11 +293,12 @@ def postprocess_vis(heatmap1,threshould = 0.9):
     heatmap = heatmap*255
     return heatmap
 
-def visualize_image(visualization,image_path,out_folder):
+def visualize_image(viz_model,image_path,out_folder):
     base=os.path.basename(image_path)
     image_name= os.path.splitext(base)[0]
     original_image,img = preprocess_image(image_path)
-    vis = visualization([img])[0][0] * 255
+    vis = viz_model(img)[0]
+    print(vis.shape)
     
     '''
     c1 =vis[:,:,0]
@@ -302,29 +311,38 @@ def visualize_image(visualization,image_path,out_folder):
     '''
     
     heatmap = postprocess_vis(vis)
+    print(heatmap.shape)
+    print(heatmap)
     
-    #to save the heatmaps and reconstructed images in another format. 
-    #Heatmaps will be in reduced channels format. While reconstructed image tensors will be multiplied by 255.
+    f, axarr = plt.subplots(1,3, figsize=(7, 25))
+    axarr[0].imshow(original_image)
+    axarr[0].set_title('Original image')
+    axarr[0].axis('off')
+    axarr[1].imshow(vis)
+    axarr[1].set_title('Reconstructed image')
+    axarr[1].axis('off')
+    axarr[2].imshow(heatmap,cmap='Reds')
+    axarr[2].set_title('Heatmap')
+    axarr[2].axis('off')
 
-    vis_path = os.path.join(out_folder,image_name+'_vis.jpg')
-    cv2.imwrite(vis_path,vis)
-
-    heatmap_path = os.path.join(out_folder,image_name+'_heatmap.jpg')
-    cv2.imwrite(heatmap_path,heatmap)
-    
+    plt.savefig(f"{out_folder}/plot-{image_name}.png", dpi=300)
+    np.save(f"{out_folder}/map-{image_name}.npy", heatmap)    
     plt.show()
     
-    
-def visualize_folder(visualization,images_folder,out_folder):	
+def visualize_folder(viz_model,image_paths,out_folder):	
     if not os.path.exists(out_folder):
-        os.makedirs(out_folde)
-    for path in os.listdir(images_folder):
-		    print(path)
-		    image_path = os.path.join(images_folder,path)
-		    visualize_image(visualization,image_path,out_folder)
+        os.makedirs(out_folder)
+    for path in image_paths:
+        print(path)
+        visualize_image(viz_model,path,out_folder)
 
-visualization,model = build_visualization('/model/ResTS.h5')
+viz_model, full_model = build_visualization("ResTS-full.h5")
 
-images_folder = '/visualizations'
-out_folder = '/images'
-visualize_folder(visualization,images_folder,out_folder)
+DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
+TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
+image_path_df = pd.read_csv(TEST_TXT, sep='\t', header=None, names=['img_path', 'label_num'])
+print(image_path_df.head())
+image_paths = image_path_df[0:10]['img_path'].tolist()
+
+out_folder = "../example_maps"
+visualize_folder(viz_model,image_paths,out_folder)

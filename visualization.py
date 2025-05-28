@@ -298,7 +298,6 @@ def visualize_image(viz_model,image_path,out_folder):
     image_name= os.path.splitext(base)[0]
     original_image,img = preprocess_image(image_path)
     vis = viz_model(img)[0]
-    print(vis.shape)
     
     '''
     c1 =vis[:,:,0]
@@ -311,8 +310,6 @@ def visualize_image(viz_model,image_path,out_folder):
     '''
     
     heatmap = postprocess_vis(vis)
-    print(heatmap.shape)
-    print(heatmap)
     
     f, axarr = plt.subplots(1,3, figsize=(7, 25))
     axarr[0].imshow(original_image)
@@ -325,13 +322,15 @@ def visualize_image(viz_model,image_path,out_folder):
     axarr[2].set_title('Heatmap')
     axarr[2].axis('off')
 
-    plt.savefig(f"{out_folder}/plot-{image_name}.png", dpi=300)
-    np.save(f"{out_folder}/map-{image_name}.npy", heatmap)    
+    plt.savefig(f"{out_folder}/plots/{image_name}.png", dpi=300)
+    np.save(f"{out_folder}/maps/{image_name}.npy", heatmap)    
     plt.show()
     
 def visualize_folder(viz_model,image_paths,out_folder):	
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
+        os.makedirs(f"{out_folder}/plots")
+        os.makedirs(f"{out_folder}/maps")
     for path in image_paths:
         print(path)
         visualize_image(viz_model,path,out_folder)
@@ -340,9 +339,17 @@ viz_model, full_model = build_visualization("ResTS-full.h5")
 
 DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
 TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
+LABELS_TXT = f"{DATASPLIT_DIR}/labels.txt"
+
 image_path_df = pd.read_csv(TEST_TXT, sep='\t', header=None, names=['img_path', 'label_num'])
+
+with open(LABELS_TXT) as file:
+    class_names = [line.rstrip() for line in file]
+
+image_path_df['label'] = image_path_df.apply(lambda i: class_names[i['label_num']], axis=1)
+
 print(image_path_df.head())
 image_paths = image_path_df[0:10]['img_path'].tolist()
 
-out_folder = "../example_maps"
+out_folder = "../example_maps2"
 visualize_folder(viz_model,image_paths,out_folder)

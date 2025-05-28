@@ -291,7 +291,7 @@ y_pred, x = model.predict(test_ds, batch_size=BATCH_SIZE)
 print(y_pred.shape, x.shape)
 y_pred2 = np.argmax(y_pred, axis=1)
 
-y_true = np.concatenate([y for x, y in test_ds], axis=0)
+y_true = np.array([y for x, y in test_ds])
 # target_names = [str(i) for i in os.listdir('/content/test')]
 print("F1 Score: " + str(f1_score(y_true, y_pred2, average='weighted')))
 

@@ -90,8 +90,9 @@ test_ds = load_dataset(TEST_TXT)
 print("train: ", len(train_ds))
 print("test: ", len(test_ds))
 
-train_ds = train_ds.batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
-test_ds = test_ds.batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
+# TODO: attach seed to shuffle
+train_ds = train_ds.shuffle(len(train_ds), seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
+test_ds = test_ds.shuffle(len(test_ds), seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
 
 # Optional: Add augmentation (only on training set)
 data_augmentation = tf.keras.Sequential(
@@ -347,13 +348,13 @@ model.compile(
 )
 model.summary()
 
-nb_epoch = 2 #15
+nb_epoch = 15
 history = model.fit(
     train_ds,
-    steps_per_epoch=2, #2545,
+    steps_per_epoch=None,
     epochs=nb_epoch,
     validation_data=test_ds,
-    validation_steps=1 #678,
+    validation_steps=None,
 )
 
 df = pd.DataFrame(history.history)
@@ -362,3 +363,4 @@ try:
     model.save("ResTS.h5")
 except:
     print("Check if the model has been saved!")
+ 

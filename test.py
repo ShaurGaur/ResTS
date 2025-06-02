@@ -286,16 +286,16 @@ BATCH_SIZE=16
 test_ds = load_dataset(TEST_TXT)
 test_ds = test_ds.batch(BATCH_SIZE)
 test_ds = test_ds.map(preprocess_and_duplicate_labels)
-y_pred, x = model.predict(test_ds, batch_size=BATCH_SIZE)
 
-print(y_pred.shape, x.shape)
+y_pred, _ = model.predict(test_ds, batch_size=BATCH_SIZE)
+y_true = np.concatenate([y["out1"] for x, y in test_ds], axis=0)
 y_pred2 = np.argmax(y_pred, axis=1)
+y_true2 = np.argmax(y_true, axis=1)
+print(y_pred2.shape, y_true2.shape)
 
-y_true = np.array([y for x, y in test_ds])
-# target_names = [str(i) for i in os.listdir('/content/test')]
-print("F1 Score: " + str(f1_score(y_true, y_pred2, average='weighted')))
+print("F1 Score: " + str(f1_score(y_true2, y_pred2, average='weighted')))
 
-df = pd.read_csv('./ResTS15epochs-old.csv')
+df = pd.read_csv('./ResTS15epochs.csv')
 df2 = pd.read_csv('./Pre-trained model access/training history/ResTS.csv')
 
 #Our training
@@ -333,7 +333,7 @@ plt.title('Training loss')
 plt.legend(loc=0)
 
 plt.subplot(1,2,2)
-plt.plot(epochs, val_loss, 'r', label='ResTS', marker='o')
+plt.plot(epochs, val_loss, 'r', label='ResTS-WUR', marker='o')
 plt.plot(epochs2, val_loss2, 'g', label='ResTS-original', marker='o')
 plt.xlabel('Epochs')
 plt.title('Validation loss')

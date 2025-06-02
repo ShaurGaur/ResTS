@@ -91,8 +91,8 @@ print("train: ", len(train_ds))
 print("test: ", len(test_ds))
 
 # TODO: attach seed to shuffle
-train_ds = train_ds.shuffle(len(train_ds), seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
-test_ds = test_ds.shuffle(len(test_ds), seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
+train_ds = train_ds.shuffle(buffer_size=3000, seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
+test_ds = test_ds.shuffle(buffer_size=3000, seed=SEED, reshuffle_each_iteration=True).batch(BATCH_SIZE).map(preprocess_and_duplicate_labels)
 
 # Optional: Add augmentation (only on training set)
 data_augmentation = tf.keras.Sequential(

@@ -2,7 +2,7 @@
 #SBATCH --time=1200
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem-per-cpu=8192
+#SBATCH --mem-per-cpu=10240
 #SBATCH --cpus-per-task=1
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu

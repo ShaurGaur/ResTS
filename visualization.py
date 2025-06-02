@@ -335,7 +335,7 @@ def visualize_folder(viz_model,image_paths,out_folder):
         print(path)
         visualize_image(viz_model,path,out_folder)
 
-viz_model, full_model = build_visualization("ResTS-full.h5")
+viz_model, full_model = build_visualization("ResTS.h5")
 
 DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
 TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
@@ -351,5 +351,5 @@ image_path_df['label'] = image_path_df.apply(lambda i: class_names[i['label_num'
 print(image_path_df.head())
 image_paths = image_path_df[0:10]['img_path'].tolist()
 
-out_folder = "../example_maps2"
+out_folder = "../example_maps3"
 visualize_folder(viz_model,image_paths,out_folder)

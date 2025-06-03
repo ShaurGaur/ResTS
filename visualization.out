@@ -1,18 +1,11 @@
-                                            img_path  ...                                              label
-0  /lustre/backup/WUR/WFSR/gaur001/PlantVillage-D...  ...  Corn_(maize)___Cercospora_leaf_spot Gray_leaf_...
-1  /lustre/backup/WUR/WFSR/gaur001/PlantVillage-D...  ...  Corn_(maize)___Cercospora_leaf_spot Gray_leaf_...
-2  /lustre/backup/WUR/WFSR/gaur001/PlantVillage-D...  ...  Corn_(maize)___Cercospora_leaf_spot Gray_leaf_...
-3  /lustre/backup/WUR/WFSR/gaur001/PlantVillage-D...  ...  Corn_(maize)___Cercospora_leaf_spot Gray_leaf_...
-4  /lustre/backup/WUR/WFSR/gaur001/PlantVillage-D...  ...  Corn_(maize)___Cercospora_leaf_spot Gray_leaf_...
-
-[5 rows x 3 columns]
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ae535bc2-e24f-437e-ba3c-661fb05c0173___RS_GLSp 4461_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/dc846417-563a-4e11-b4ba-b093db6af0b7___RS_GLSp 4430_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/9103b8e5-919c-4d08-a282-25176874769c___RS_GLSp 4653_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/7118cb62-d96a-4ae0-8c85-634aa6bc6f62___RS_GLSp 4354_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/cfbb5e1c-2812-4467-9748-ee171462c331___RS_GLSp 4371_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/c17a8d9b-f000-4df3-9673-444de04b7dbd___RS_GLSp 9309_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/2c890074-1b01-46cb-9e56-8601d13ec218___RS_GLSp 4469 copy_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/c7707d46-6667-44ae-bb3c-fc7b2b8bb76c___RS_GLSp 7298_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/4d603da2-b570-4d8a-ba97-28f99c42dd89___RS_GLSp 7343_final_masked.jpg
-/lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ec76caa7-e1a4-440e-9b4c-3ee355aac33b___RS_GLSp 4479_final_masked.jpg
+Visualizing 10 images into ../example_maps4 ...
+1 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ae535bc2-e24f-437e-ba3c-661fb05c0173___RS_GLSp 4461_final_masked.jpg
+2 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/dc846417-563a-4e11-b4ba-b093db6af0b7___RS_GLSp 4430_final_masked.jpg
+3 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/9103b8e5-919c-4d08-a282-25176874769c___RS_GLSp 4653_final_masked.jpg
+4 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/7118cb62-d96a-4ae0-8c85-634aa6bc6f62___RS_GLSp 4354_final_masked.jpg
+5 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/cfbb5e1c-2812-4467-9748-ee171462c331___RS_GLSp 4371_final_masked.jpg
+6 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/c17a8d9b-f000-4df3-9673-444de04b7dbd___RS_GLSp 9309_final_masked.jpg
+7 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/2c890074-1b01-46cb-9e56-8601d13ec218___RS_GLSp 4469 copy_final_masked.jpg
+8 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/c7707d46-6667-44ae-bb3c-fc7b2b8bb76c___RS_GLSp 7298_final_masked.jpg
+9 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/4d603da2-b570-4d8a-ba97-28f99c42dd89___RS_GLSp 7343_final_masked.jpg
+10 / 10: /lustre/backup/WUR/WFSR/gaur001/PlantVillage-Dataset/raw/segmented/Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ec76caa7-e1a4-440e-9b4c-3ee355aac33b___RS_GLSp 4479_final_masked.jpg

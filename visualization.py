@@ -284,13 +284,13 @@ def reduce_channels_sequare(heatmap):
     new_heatmap = np.sqrt(((channel1-0.149)*(channel1-0.149))+((channel2-0.1529)*(channel2-0.1529))+((channel3-0.3412)*(channel3-0.3412)))
     return new_heatmap
 	
-def postprocess_vis(heatmap1,threshould = 0.9):
+def postprocess_vis(heatmap1, threshould = 0.9):
     heatmap = heatmap1.numpy().copy()
     heatmap = (heatmap - heatmap.min())/(heatmap.max() - heatmap.min())
     heatmap = reduce_channels_sequare(heatmap)
     heatmap = (heatmap - heatmap.min())/(heatmap.max() - heatmap.min())
     heatmap[heatmap>threshould] = 1
-    heatmap = heatmap*255
+    # heatmap = heatmap*255
     return heatmap
 
 def visualize_image(viz_model,image_path,out_folder):
@@ -331,8 +331,10 @@ def visualize_folder(viz_model,image_paths,out_folder):
         os.makedirs(out_folder)
         os.makedirs(f"{out_folder}/plots")
         os.makedirs(f"{out_folder}/maps")
-    for path in image_paths:
-        print(path)
+
+    print(f'Visualizing {len(image_paths)} images into {out_folder} ...')
+    for i, path in enumerate(image_paths):
+        print(f"{i + 1} / {len(image_paths)}: {path}")
         visualize_image(viz_model,path,out_folder)
 
 viz_model, full_model = build_visualization("ResTS.h5")
@@ -342,14 +344,7 @@ TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
 LABELS_TXT = f"{DATASPLIT_DIR}/labels.txt"
 
 image_path_df = pd.read_csv(TEST_TXT, sep='\t', header=None, names=['img_path', 'label_num'])
-
-with open(LABELS_TXT) as file:
-    class_names = [line.rstrip() for line in file]
-
-image_path_df['label'] = image_path_df.apply(lambda i: class_names[i['label_num']], axis=1)
-
-print(image_path_df.head())
 image_paths = image_path_df[0:10]['img_path'].tolist()
 
-out_folder = "../example_maps3"
+out_folder = "../example_maps4"
 visualize_folder(viz_model,image_paths,out_folder)

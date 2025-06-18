@@ -257,6 +257,7 @@ model.load_weights('./ResTS-full.h5')
 
 DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
 TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
+PLANTSEG_TXT = f"../XAI-Eval-PlantDisease-WFSR/data/plantseg-test.txt"
 
 def load_image(file_path):
     image = tf.io.read_file(file_path)
@@ -283,7 +284,7 @@ def preprocess_and_duplicate_labels(x, y):
     return x, {"out1": y, "out2": y}  # Duplicate labels for dual output heads
 
 BATCH_SIZE=16
-test_ds = load_dataset(TEST_TXT)
+test_ds = load_dataset(PLANTSEG_TXT)
 test_ds = test_ds.batch(BATCH_SIZE)
 test_ds = test_ds.map(preprocess_and_duplicate_labels)
 

@@ -13,6 +13,6 @@
 #SBATCH --mail-type=ALL
 
 
-source /lustre/backup/WUR/WFSR/gaur001/venv/bin/activate
+source /lustre/backup/WUR/WFSR/gaur001/venv11/bin/activate
 python3 /lustre/backup/WUR/WFSR/gaur001/ResTS/test.py
 deactivate

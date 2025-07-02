@@ -258,6 +258,7 @@ model.load_weights('./ResTS-full.h5')
 DATASPLIT_DIR = "../PlantVillage-Dataset/lmdb/segmented-80-20"
 TEST_TXT = f"{DATASPLIT_DIR}/test.txt"
 PLANTSEG_TXT = f"../XAI-Eval-PlantDisease-WFSR/data/plantseg-test.txt"
+DATASET_FILE = PLANTSEG_TXT
 
 def load_image(file_path):
     image = tf.io.read_file(file_path)
@@ -284,109 +285,117 @@ def preprocess_and_duplicate_labels(x, y):
     return x, {"out1": y, "out2": y}  # Duplicate labels for dual output heads
 
 BATCH_SIZE=16
-test_ds = load_dataset(PLANTSEG_TXT)
+test_ds = load_dataset(DATASET_FILE)
 test_ds = test_ds.batch(BATCH_SIZE)
 test_ds = test_ds.map(preprocess_and_duplicate_labels)
 
-y_pred, _ = model.predict(test_ds, batch_size=BATCH_SIZE)
+y_pred_t, y_pred_s = model.predict(test_ds, batch_size=BATCH_SIZE)
 y_true = np.concatenate([y["out1"] for x, y in test_ds], axis=0)
-y_pred2 = np.argmax(y_pred, axis=1)
+
+y_pred_t2 = np.argmax(y_pred_t, axis=1)
+y_pred_s2 = np.argmax(y_pred_s, axis=1)
 y_true2 = np.argmax(y_true, axis=1)
-print(y_pred2.shape, y_true2.shape)
 
-print("F1 Score: " + str(f1_score(y_true2, y_pred2, average='weighted')))
+print("F1 Score (teacher): " + str(f1_score(y_true2, y_pred_t2, average='weighted')))
+print("F1 Score (student): " + str(f1_score(y_true2, y_pred_s2, average='weighted')))
 
-df = pd.read_csv('./ResTS15epochs.csv')
-df2 = pd.read_csv('./Pre-trained model access/training history/ResTS.csv')
+pred_df = pd.read_csv(DATASET_FILE, sep='\t', header=None, names=['img_path', 'label_num'])
+pred_df['y_true'] = y_true2
+pred_df['y_pred_teacher'] = y_pred_t2
+pred_df['y_pred_student'] = y_pred_s2
+pred_df.to_csv(f"./preds-PlantSeg.csv")
 
-#Our training
-out1_loss = df['out1_loss']
-val_out1_loss = df['val_out1_loss']
-loss = df['loss']
-val_loss = df['val_loss']
-out2_loss = df['out2_loss']
-val_out2_loss = df['val_out2_loss']
-out1_accuracy = df['out1_accuracy']
-val_out1_accuracy = df['val_out1_accuracy']
-out2_accuracy = df['out2_accuracy']
-val_out2_accuracy = df['val_out2_accuracy']
-epochs = range(len(loss))
+# df = pd.read_csv('./ResTS15epochs.csv')
+# df2 = pd.read_csv('./Pre-trained model access/training history/ResTS.csv')
 
-#Original training
-out1_loss2 = df2['out1_loss']
-val_out1_loss2 = df2['val_out1_loss']
-loss2 = df2['loss']
-val_loss2 = df2['val_loss']
-out2_loss2 = df2['out2_loss']
-val_out2_loss2 = df2['val_out2_loss']
-out1_accuracy2 = df2['out1_accuracy']
-val_out1_accuracy2 = df2['val_out1_accuracy']
-out2_accuracy2 = df2['out2_accuracy']
-val_out2_accuracy2 = df2['val_out2_accuracy']
-epochs2 = range(len(loss2))
+# #Our training
+# out1_loss = df['out1_loss']
+# val_out1_loss = df['val_out1_loss']
+# loss = df['loss']
+# val_loss = df['val_loss']
+# out2_loss = df['out2_loss']
+# val_out2_loss = df['val_out2_loss']
+# out1_accuracy = df['out1_accuracy']
+# val_out1_accuracy = df['val_out1_accuracy']
+# out2_accuracy = df['out2_accuracy']
+# val_out2_accuracy = df['val_out2_accuracy']
+# epochs = range(len(loss))
 
-plt.figure(figsize=(16,4))
-plt.subplot(1,2,1)
-plt.plot(epochs, loss, 'r', label='ResTS-WUR', marker='o')
-plt.plot(epochs2, loss2, 'g', label='ResTS-original', marker='o')
-plt.xlabel('Epochs')
-plt.title('Training loss')
-plt.legend(loc=0)
+# #Original training
+# out1_loss2 = df2['out1_loss']
+# val_out1_loss2 = df2['val_out1_loss']
+# loss2 = df2['loss']
+# val_loss2 = df2['val_loss']
+# out2_loss2 = df2['out2_loss']
+# val_out2_loss2 = df2['val_out2_loss']
+# out1_accuracy2 = df2['out1_accuracy']
+# val_out1_accuracy2 = df2['val_out1_accuracy']
+# out2_accuracy2 = df2['out2_accuracy']
+# val_out2_accuracy2 = df2['val_out2_accuracy']
+# epochs2 = range(len(loss2))
 
-plt.subplot(1,2,2)
-plt.plot(epochs, val_loss, 'r', label='ResTS-WUR', marker='o')
-plt.plot(epochs2, val_loss2, 'g', label='ResTS-original', marker='o')
-plt.xlabel('Epochs')
-plt.title('Validation loss')
-plt.legend(loc=0)
-plt.savefig('ResTSOldVsNewLine.png', dpi=300, bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(16,4))
+# plt.subplot(1,2,1)
+# plt.plot(epochs, loss, 'r', label='ResTS-WUR', marker='o')
+# plt.plot(epochs2, loss2, 'g', label='ResTS-original', marker='o')
+# plt.xlabel('Epochs')
+# plt.title('Training loss')
+# plt.legend(loc=0)
 
-#Xception
-out1_loss = df['out1_loss']
-val_out1_loss = df['val_out1_loss']
-loss = df['loss']
-val_loss = df['val_loss']
-out2_loss = df['out2_loss']
-val_out2_loss = df['val_out2_loss']
-out1_accuracy = df['out1_accuracy']
-val_out1_accuracy = df['val_out1_accuracy']
-out2_accuracy = df['out2_accuracy']
-val_out2_accuracy = df['val_out2_accuracy']
-epochs = range(len(loss))
+# plt.subplot(1,2,2)
+# plt.plot(epochs, val_loss, 'r', label='ResTS-WUR', marker='o')
+# plt.plot(epochs2, val_loss2, 'g', label='ResTS-original', marker='o')
+# plt.xlabel('Epochs')
+# plt.title('Validation loss')
+# plt.legend(loc=0)
+# plt.savefig('ResTSOldVsNewLine.png', dpi=300, bbox_inches='tight')
+# plt.show()
 
-plt.figure(figsize=(16,4))
-plt.subplot(1,2,1)
-plt.plot(epochs, loss, 'b', label='ResTS', marker='o')
-plt.plot(epochs, out1_loss, 'r', label='ResTeacher', marker='o')
-plt.plot(epochs, out2_loss, 'g', label='ResStudent', marker='o')
-plt.title('Training loss')
-plt.xlabel('Epochs')
-plt.legend(loc=0)
+# #Xception
+# out1_loss = df['out1_loss']
+# val_out1_loss = df['val_out1_loss']
+# loss = df['loss']
+# val_loss = df['val_loss']
+# out2_loss = df['out2_loss']
+# val_out2_loss = df['val_out2_loss']
+# out1_accuracy = df['out1_accuracy']
+# val_out1_accuracy = df['val_out1_accuracy']
+# out2_accuracy = df['out2_accuracy']
+# val_out2_accuracy = df['val_out2_accuracy']
+# epochs = range(len(loss))
 
-plt.subplot(1,2,2)
-plt.plot(epochs, val_loss, 'b', label='ResTS', marker='o')
-plt.plot(epochs, val_out1_loss, 'r', label='ResTeacher', marker='o')
-plt.plot(epochs, val_out2_loss, 'g', label='ResStudent', marker='o')
-plt.title('Validation loss')
-plt.xlabel('Epochs')
-plt.legend(loc=0)
-plt.savefig('loss.png', dpi=300, bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(16,4))
+# plt.subplot(1,2,1)
+# plt.plot(epochs, loss, 'b', label='ResTS', marker='o')
+# plt.plot(epochs, out1_loss, 'r', label='ResTeacher', marker='o')
+# plt.plot(epochs, out2_loss, 'g', label='ResStudent', marker='o')
+# plt.title('Training loss')
+# plt.xlabel('Epochs')
+# plt.legend(loc=0)
 
-plt.figure(figsize=(16,4))
-plt.subplot(1,2,1)
-plt.plot(epochs, out1_accuracy, 'r', label='ResTeacher', marker='o')
-plt.plot(epochs, out2_accuracy, 'g', label='ResStudent', marker='o')
-plt.title('Training accuracy')
-plt.xlabel('Epochs')
-plt.legend(loc=0)
+# plt.subplot(1,2,2)
+# plt.plot(epochs, val_loss, 'b', label='ResTS', marker='o')
+# plt.plot(epochs, val_out1_loss, 'r', label='ResTeacher', marker='o')
+# plt.plot(epochs, val_out2_loss, 'g', label='ResStudent', marker='o')
+# plt.title('Validation loss')
+# plt.xlabel('Epochs')
+# plt.legend(loc=0)
+# plt.savefig('loss.png', dpi=300, bbox_inches='tight')
+# plt.show()
 
-plt.subplot(1,2,2)
-plt.plot(epochs, val_out1_accuracy, 'r', label='ResTeacher', marker='o')
-plt.plot(epochs, val_out2_accuracy, 'g', label='ResStudent', marker='o')
-plt.title('Validation accuracy')
-plt.xlabel('Epochs')
-plt.legend(loc=0)
-plt.savefig('acc.png', dpi=300, bbox_inches='tight')
-plt.show()
+# plt.figure(figsize=(16,4))
+# plt.subplot(1,2,1)
+# plt.plot(epochs, out1_accuracy, 'r', label='ResTeacher', marker='o')
+# plt.plot(epochs, out2_accuracy, 'g', label='ResStudent', marker='o')
+# plt.title('Training accuracy')
+# plt.xlabel('Epochs')
+# plt.legend(loc=0)
+
+# plt.subplot(1,2,2)
+# plt.plot(epochs, val_out1_accuracy, 'r', label='ResTeacher', marker='o')
+# plt.plot(epochs, val_out2_accuracy, 'g', label='ResStudent', marker='o')
+# plt.title('Validation accuracy')
+# plt.xlabel('Epochs')
+# plt.legend(loc=0)
+# plt.savefig('acc.png', dpi=300, bbox_inches='tight')
+# plt.show()
